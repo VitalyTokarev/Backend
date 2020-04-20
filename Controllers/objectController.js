@@ -3,14 +3,14 @@ const Object = require('../Models/Object.js');
 exports.objectList = (req, res) => {
     Object.find({}).
     exec( (err, listObjects) => {
-        if (err) { res.sendStatus(500); }
+        if (err) { res.sendStatus(404); }
 
         console.log(listObjects);
         res.send(JSON.stringify(listObjects));
     });
 };
 
-exports.objectCreate = (req, res) => {
+exports.objectCreate = (req, res, next) => {
     if(!req.body) { return res.sendStatus(400); }
 
     const {
@@ -28,7 +28,7 @@ exports.objectCreate = (req, res) => {
     });
 
     object.save( err => {
-        if (err) { return res.sendStatus(500); }
+        if (err) { return res.sendStatus(404); }
         res.sendStatus(200);
     });
 };
@@ -49,7 +49,7 @@ exports.objectUpdate = (req, res) => {
         fruit,
     }, 
     (err) => {
-        if (err) { return res.sendStatus(500); }
+        if (err) { return res.sendStatus(404); }
         res.sendStatus(200);
     }
     );
@@ -58,7 +58,7 @@ exports.objectUpdate = (req, res) => {
 exports.objectDelete = (req, res) => {
     if(!req.body) { return res.sendStatus(400); }
     Object.findByIdAndDelete(req.body.id, err => {
-        if (err) { return res.sendStatus(400); }
+        if (err) { return res.sendStatus(404); }
         res.sendStatus(200);
     });
 };
