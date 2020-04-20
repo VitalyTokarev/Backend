@@ -7,7 +7,6 @@ const express = require('express'),
     objectRouter = require('./Routes/objects');;
 
 app.use(bodyParser.json());
-app.use('/', objectRouter);
 
 mongoose.connect(process.env.CONNECTION_STRING, { 
     useUnifiedTopology: true,
@@ -16,6 +15,7 @@ mongoose.connect(process.env.CONNECTION_STRING, {
 })
 .then(() => {
     console.log('DB Connected!');
+    app.use('/', objectRouter);
 })
 .catch(err => {
 console.log(err.message);
