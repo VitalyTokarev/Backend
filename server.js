@@ -5,7 +5,7 @@ const express = require('express'),
     app = express(),
     port = process.argv[2] || process.env.PORT,
     objectRouter = require('./Routes/object'),
-    objectEditionRouter = require('./Routes/object/objects');
+    actionObjectsRouter = require('./Routes/object/actionsObject');
 
 app.use(bodyParser.json());
 
@@ -17,7 +17,7 @@ mongoose.connect(process.env.CONNECTION_STRING, {
 .then(() => {
     console.log('DB Connected!');
     app.use('/', objectRouter);
-    app.use('/object', objectEditionRouter)
+    app.use('/object', actionObjectsRouter)
 })
 .catch(err => {
 console.log(err.message);
