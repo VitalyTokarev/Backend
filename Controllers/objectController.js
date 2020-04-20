@@ -5,7 +5,6 @@ exports.objectList = (req, res) => {
     exec( (err, listObjects) => {
         if (err) { res.sendStatus(404); }
 
-        console.log(listObjects);
         res.send(JSON.stringify(listObjects));
     });
 };

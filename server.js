@@ -4,7 +4,8 @@ const express = require('express'),
     mongoose = require('mongoose'),
     app = express(),
     port = process.argv[2] || process.env.PORT,
-    objectRouter = require('./Routes/objects');;
+    objectRouter = require('./Routes/object'),
+    objectEditionRouter = require('./Routes/object/objects');
 
 app.use(bodyParser.json());
 
@@ -16,6 +17,7 @@ mongoose.connect(process.env.CONNECTION_STRING, {
 .then(() => {
     console.log('DB Connected!');
     app.use('/', objectRouter);
+    app.use('/object', objectEditionRouter)
 })
 .catch(err => {
 console.log(err.message);
