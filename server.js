@@ -1,48 +1,22 @@
 require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-
-const app = express();
-
-let port = process.argv[2] || process.env.PORT;
+const express = require('express'),
+    bodyParser = require('body-parser'),
+    mongoose = require('mongoose'),
+    app = express(),
+    port = process.argv[2] || process.env.PORT,
+    objectRouter = require('./Routes/objects');;
 
 app.use(bodyParser.json());
+app.use('/', objectRouter);
 
-const users = [];
+mongoose.connect(process.env.CONNECTION_STRING, { 
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+    useFindAndModify: false  
+})
+.then(() => console.log('DB Connected!'))
+.catch(err => {
+console.log(err.message);
+});;
  
-app.get("/Object",  (request, response) => {
-    response.send(JSON.stringify(users));
-});
-
-app.post("/Object",  (request, response) => {
-    if(!request.body) return response.sendStatus(400);
-
-    users.push(request.body);
-    response.sendStatus(200);
-});
-
-app.put("/Object",  (request, response) => {
-    if(!request.body) return response.sendStatus(400);
-
-    const editIndex = users.findIndex(m => m.id === request.body.id)
-
-    if(editIndex!==-1) {
-        users[editIndex].value = request.body.value;
-        users[editIndex].type = request.body.type;
-        users[editIndex].fruit = request.body.fruit;
-        response.sendStatus(200);
-    }
-});
-
-app.delete("/Object",  (request, response) => {
-    if(!request.body) return response.sendStatus(400);
-
-    const editIndex = users.findIndex(m => m.id === request.body.id)
-
-    if(editIndex !==-1) {
-        users.splice( editIndex, 1);
-        response.sendStatus(200);
-    }
-});
-
 app.listen(port);
