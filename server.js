@@ -14,9 +14,11 @@ mongoose.connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true,
     useFindAndModify: false  
 })
-.then(() => console.log('DB Connected!'))
+.then(() => {
+    console.log('DB Connected!');
+})
 .catch(err => {
 console.log(err.message);
-});;
+});
  
 app.listen(port);
