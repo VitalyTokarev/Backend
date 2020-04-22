@@ -3,9 +3,23 @@ const mongoose = require('mongoose'),
 
 const ObjectModelSchema = new Schema({
     _id: String,
-    value: String,
-    type: String,
-    fruit: String
+    value: { 
+        type:String,
+        required:true
+    },
+    type: { 
+        type:String,
+        required:true
+    },
+    fruit: { 
+        type:String,
+        required:true
+    },
+    user: [{ 
+        type: Schema.Types.ObjectId, 
+        ref: 'User',
+        required: true
+    }]
 });
 
 module.exports = mongoose.model('ObjectModel', ObjectModelSchema);

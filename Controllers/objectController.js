@@ -9,7 +9,7 @@ exports.objectList = (req, res) => {
     });
 };
 
-exports.objectCreate = (req, res, next) => {
+exports.objectCreate = (req, res) => {
     if(!req.body) { return res.sendStatus(400); }
 
     const {

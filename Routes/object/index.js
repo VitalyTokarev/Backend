@@ -1,7 +1,5 @@
-const express = require('express'),
-    router = express.Router(),
-    objectController = require('../../Controllers/objectController');
+const objectController = require('../../Controllers/objectController');
 
-router.get('/object', objectController.objectList);
-
-module.exports = router;
+module.exports = (router, path = '') => {
+    router.get(`${path}/object`, objectController.objectList);
+};
