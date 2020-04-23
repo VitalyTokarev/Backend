@@ -10,4 +10,4 @@ module.exports = user => {
         email: user.email
       }
     }, process.env.SECRET_KEY, { expiresIn: '6h' });
-  }
+}
