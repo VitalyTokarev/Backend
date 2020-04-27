@@ -2,24 +2,45 @@ require('dotenv').config();
 
 const express = require('express'),
     bodyParser = require('body-parser'),
-    mongoose = require('mongoose'),
+    mongoose = require('mongoose')
+    cookieParser = require('cookie-parser'),
+    createError = require('http-errors'),
     app = express(),
     port = process.argv[2] || process.env.PORT,
-    router = require('./Routes');
+    routerUser = require('./Routes/user'),
+    routerObject = require('./Routes/object'),
+    routerAtcionsObject = require('./Routes/object/actionsObject');
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 
-mongoose.connect(process.env.CONNECTION_STRING, { 
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-    useFindAndModify: false  
-})
-.then(() => {
-    console.log('DB Connected!');
-    app.use('/', router);
-})
-.catch(err => {
-console.log(err.message);
+app.use('/user', routerUser);
+app.use('/', routerObject);
+app.use('/object', routerAtcionsObject);
+
+app.use((req, res, next) => next(createError(404)));
+app.use((error, req, res, next) => {
+    console.log(error.status, error.message);
+    res.status(error.status || 500)
+    res.json({
+      status: error.status,
+      message: error.message,
+    })
 });
  
-app.listen(port);
+app.listen(port, async () => {
+    console.log('Server start at port:', port);
+
+    mongoose.connect(process.env.CONNECTION_STRING, { 
+        useUnifiedTopology: true,
+        useNewUrlParser: true,
+        useFindAndModify: false,
+        useCreateIndex: true,  
+    })
+    .then(() => {
+        console.log('DB Connected!');
+    })
+    .catch(err => {
+    console.log(err.message);
+    });
+});

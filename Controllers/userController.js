@@ -1,64 +1,121 @@
 const argon2 = require('argon2'),
     { randomBytes } = require('crypto'), 
+    createError = require('http-errors'),
     User = require('./../Models/User'),
-    jwtGenerate = require('./../Services');
+    { 
+        validateTokens,
+        generateTokens,
+    } = require('../Services/actionsTokens');
 
-exports.login = async (req, res) => {
-    if (!req.body) { return res.sendStatus(400) }; 
+const decodeTokens = (token, splitParam = '.', index = 0) => {
+    return Buffer.from(token.split(splitParam)[index], 'base64').toString();
+};
 
-    const email = req.body.email;
-    const userRecord = await User.findOne({ email });
+exports.validateLoginRequest = async (req, res, next) => {
+    if (!req.headers.authorization || !JSON.parse(req.headers.authorization).user) {
+        throw createError(400, 'Bad request'); 
+    } 
 
-    if (!userRecord) {
-        return res.sendStatus(404);
-    }
+    return next();
+};
 
-    const password = req.body.password;
-    const correctPassword = await argon2.verify(userRecord.password, password);
+exports.verifyLoginRequest = async (req, res, next) => {
+    const authData = JSON.parse(req.headers.authorization).user;
+    const email = decodeTokens(authData, ':', 0);
+    const password = decodeTokens(authData, ':', 1);
+
+    const user = await User.findOne({ email });
+    if (!user) { throw createError(403, 'User not found'); }
+
+    const correctPassword = await argon2.verify(user.password, password);
 
     if (!correctPassword) {
-        return res.sendStatus(401);
+        throw createError(403, 'Incorrect password');
     }
 
-    return res.send(JSON.stringify(
-        {
-            user:{
-                email: userRecord.email,
-                name: userRecord.name,
-            },
-            token: jwtGenerate(userRecord),
-        }
-    ));
+    req.user = user;
+    return next();
 };
-exports.signup = async (req, res) => {
-    if (!req.body) { return res.sendStatus(400) }; 
 
-    const email = req.body.email,
-        password = req.body.password,
-        name = req.body.name,
-        salt = randomBytes(32),
-        passwordHashed = await argon2.hash(password, {salt});
+exports.validateSignupRequest = async (req, res, next) => {
+    if (!req.body || !req.body.email || !req.body.password || !req.body.name) { 
+        throw createError(400, 'Bad request'); 
+    }
 
+    return next();
+};
+
+exports.verifySignupRequest = async (req, res, next) => {
+    const sameEmail = await User.findOne( { email: req.body.email });
+    if (sameEmail) { throw createError(403, 'Exist user with same email'); }
+
+    return next();
+};
+
+exports.createNewUser = async (req, res, next) => {
+
+    const salt = randomBytes(32),
+        passwordHashed = await argon2.hash( password, {salt} );
+    
     const user = new User({
-        password:passwordHashed,
-        email,
-        name,
+        password: passwordHashed,
+        email: req.body.email,
+        name: req.body.name,
         salt: salt.toString('hex'),
     });
 
-    user.save( err => {
-        if (err) { return res.sendStatus(404); }
+    req.user = user;
+    return next();
+};
 
-        return res.send(JSON.stringify(
-            {
-                user:{
-                    email: user.email,
-                    name: user.name,
-                },
-                token: jwtGenerate(user),
-            }
-        ));
+exports.validateRefreshTokensRequest = async (req, res, next) => {
+    if (!req.headers.authorization || !JSON.parse(req.headers.authorization).token) {
+        throw createError(400, 'Bad request'); 
+    }
+
+    return next();
+};
+
+exports.verifyRefrshTokensRequest = async (req, res, next) => {
+    const refreshToken = JSON.parse(req.headers.authorization).token;
+
+    if (!req.cookies.accessToken 
+        || !refreshToken 
+        || !validateTokens(req.cookies.accessToken, refreshToken)
+        ) { 
+        throw createError(401, 'Authentication failed');
+    }
+
+    const userId = JSON.parse(decodeTokens(refreshToken, '.', 1)).data._id;
+    const user = await User.findById(userId);
+
+    if (!user && user.refreshToken !== refreshToken) { throw createError(401, 'Authentication failed'); }
+
+    req.user = user;
+    return next();
+};
+
+exports.setTokens = async (req, res, next) => {
+    const tokens = generateTokens(req.user);
+    req.user.refreshToken = tokens.refresh;
+
+    req.user.save( err => {
+        if (err) { throw createError(500, 'Internal server error');}
     });
+    delete req.user;
+
+    req.tokens = tokens;
+    return next();
 };
 
 
+exports.sendRepsonse = async (req, res) => {
+    res
+    .cookie('accessToken', req.tokens.access, {
+        httpOnly: true,
+        maxAge: 3600 * 24 * 1000,
+    })
+    .send(JSON.stringify({
+        token: req.tokens.refresh,
+    }))
+};

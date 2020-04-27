@@ -1,103 +1,82 @@
-const Object = require('../Models/Object'),
+const createError = require('http-errors'),
+    Object = require('../Models/Object'),
     User = require('../Models/User');
 
-const userSearch = async userId => {
-    const user = await User.findById(userId);
-    
-    if (!user) {
-        return false;
-    }
+exports.validateRequest = async (req, res, next) => {
+    if (!req.body) { throw createError(400, 'Bad request'); }
 
-    return user;
+    return next();
+};
+
+exports.verifyUser = async (req, res, next) => {
+    const user = await User.findById(req.token.data._id);
+    if (!user) { throw createError(404, 'User not found'); }
+
+    req.currUser = user;
+    return next();
 };
 
 exports.list = async (req, res) => {
+    Object.find({ user: req.currUser ._id }).
+    exec( (err, listObjects) => {
+        if (err) { throw createError(404, 'List of objects not found'); }
+    
+        res.send(JSON.stringify(listObjects));
+    });
 
-    userSearch(req.token.data._id).then( user => {
-        if (user) {
-            Object.find({ user: user._id }).
-            exec( (err, listObjects) => {
-                if (err) { res.sendStatus(404); }
-        
-                res.send(JSON.stringify(listObjects));
-            });
-            return;
-        }
-
-        res.sendStatus(401);
-    })
 };
 
-exports.create = (req, res) => {
-    if (!req.body) { return res.sendStatus(400); }
+exports.create = async (req, res) => {
+    const {
+        _id,
+        value,
+        type,
+        fruit,
+    } = req.body;
 
-    userSearch(req.token.data._id).then( user => {
-        if (user) {
-            const {
-                _id,
-                value,
-                type,
-                fruit,
-            } = req.body;
+    const object = new Object({
+        _id,
+        value,
+        type,
+        fruit,
+        user: req.currUser ._id
+    });
 
-            const object = new Object({
-                _id,
-                value,
-                type,
-                fruit,
-                user: user._id
-            });
-
-            object.save( err => {
-                if (err) { return res.sendStatus(500); }
-                res.sendStatus(200);
-            });
-            return;
-        }
-        res.sendStatus(401);
+    object.save( err => {
+        if (err) { throw createError(500, 'Internal server error'); }
+        res.sendStatus(200);
     });
 };
 
-exports.update = (req, res) => {
-    if(!req.body) { return res.sendStatus(400); }
+exports.update = async (req, res) => {
+    const {
+        _id,
+        value,
+        type,
+        fruit,
+    } = req.body;
 
-    userSearch(req.token.data._id).then( user => {
-        if(user) {
-            const {
-                _id,
-                value,
-                type,
-                fruit,
-            } = req.body;
-
-            Object.findOneAndUpdate({ _id: _id, user: user._id }, {
-                value,
-                type,
-                fruit,
-            }, 
-            (err) => {
-                if (err) { return res.sendStatus(404); }
-                res.sendStatus(200);
-            }
-            );
-            return;
+    Object.findOneAndUpdate({ _id: _id, user: req.currUser._id }, 
+        {
+            value,
+            type,
+            fruit,
+        }, 
+        (err) => {
+            if (err) { throw createError(404, 'Object not found'); }
+            res.sendStatus(200);
         }
-        res.sendStatus(401);
-    });
+    );
 };
 
-exports.delete = (req, res) => {
-    if(!req.body) { return res.sendStatus(400); }
-
-    userSearch(req.token.data._id).then( user => {
-        if(user) {
-            Object.findByIdAndDelete(req.body.id, err => {
-                if (err) { return res.sendStatus(404); }
-                res.sendStatus(200);
-            });
-            return;
-        }
-        res.sendStatus(401);
+exports.delete = async (req, res) => {
+    Object.findOneAndDelete({ 
+        _id: req.body.id,
+        user: req.currUser._id
+    }, 
+    err => {
+        if (err) { throw createError(404, 'Object not found'); }
+        res.sendStatus(200);
     });
 };
 

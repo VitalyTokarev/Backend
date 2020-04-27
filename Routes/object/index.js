@@ -1,6 +1,13 @@
 const objectController = require('../../Controllers/objectController'),
-    authToken = require('../../Middlewares/authToken');
+    router = require('express').Router(),
+    asyncHandler = require('express-async-handler'),
+    { authToken } = require('../../Services/actionsTokens');
 
-module.exports = (router, path = '') => {
-    router.get(`${path}/object`, authToken, objectController.list);
-};
+router.get(
+    '/object', 
+    authToken, 
+    asyncHandler(objectController.verifyUser),
+    asyncHandler(objectController.list),
+);
+
+module.exports = router;

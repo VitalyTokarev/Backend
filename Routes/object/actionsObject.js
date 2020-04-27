@@ -1,10 +1,30 @@
 const objectController = require('../../Controllers/objectController'),
-    authToken = require('../../Middlewares/authToken');
+    router = require('express').Router(),
+    asyncHandler = require('express-async-handler'),
+    { authToken } = require('../../Services/actionsTokens');
 
-module.exports = (router, path = '') => {
-    router.post(`${path}/create`, authToken, objectController.create);
+router.post(
+    '/create', 
+    asyncHandler(objectController.validateRequest),
+    authToken, 
+    asyncHandler(objectController.verifyUser),
+    asyncHandler(objectController.create),
+);
 
-    router.put(`${path}/update`, authToken, objectController.update);
+router.put(
+    '/update', 
+    asyncHandler(objectController.validateRequest),
+    authToken, 
+    asyncHandler(objectController.verifyUser),
+    asyncHandler(objectController.update),
+);
     
-    router.delete(`${path}/delete`, authToken, objectController.delete);
-};
+router.delete(
+    '/delete',
+    asyncHandler(objectController.validateRequest),
+    authToken, 
+    asyncHandler(objectController.verifyUser),
+    asyncHandler(objectController.delete),
+);
+
+module.exports = router;
