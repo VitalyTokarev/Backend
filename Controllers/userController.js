@@ -55,7 +55,7 @@ exports.verifySignupRequest = async (req, res, next) => {
 exports.createNewUser = async (req, res, next) => {
 
     const salt = randomBytes(32),
-        passwordHashed = await argon2.hash( password, {salt} );
+        passwordHashed = await argon2.hash( req.body.password );
     
     const user = new User({
         password: passwordHashed,
