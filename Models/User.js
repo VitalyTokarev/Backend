@@ -12,13 +12,13 @@ const UserModelSchema = new Schema({
       unique: true,
       lowercase: true,
   },
-      
-  password: {
-    type: String,
+
+  role: {
+    type:String,
     required: true,
   },
-
-  salt: {
+      
+  password: {
     type: String,
     required: true,
   },

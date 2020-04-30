@@ -9,6 +9,7 @@ router.post(
     asyncHandler(userController.setTokens), 
     asyncHandler(userController.sendRepsonse)
 );
+
 router.post(
     '/signup', 
     asyncHandler(userController.validateSignupRequest), 
@@ -17,11 +18,13 @@ router.post(
     asyncHandler(userController.setTokens), 
     asyncHandler(userController.sendRepsonse)
 );
+
 router.post(
     '/update_token', 
     asyncHandler(userController.validateRefreshTokensRequest),
     asyncHandler(userController.verifyRefrshTokensRequest),
     asyncHandler(userController.setTokens), 
-    asyncHandler(userController.sendRepsonse));
+    asyncHandler(userController.sendRepsonse)
+);
 
 module.exports = router;

@@ -1,5 +1,4 @@
 const argon2 = require('argon2'),
-    { randomBytes } = require('crypto'), 
     createError = require('http-errors'),
     User = require('./../Models/User'),
     { 
@@ -54,14 +53,13 @@ exports.verifySignupRequest = async (req, res, next) => {
 
 exports.createNewUser = async (req, res, next) => {
 
-    const salt = randomBytes(32),
-        passwordHashed = await argon2.hash( req.body.password );
+    const  passwordHashed = await argon2.hash( req.body.password );
     
     const user = new User({
         password: passwordHashed,
         email: req.body.email,
         name: req.body.name,
-        salt: salt.toString('hex'),
+        role: 'user',
     });
 
     req.user = user;
@@ -83,13 +81,13 @@ exports.verifyRefrshTokensRequest = async (req, res, next) => {
         || !refreshToken 
         || !validateTokens(req.cookies.accessToken, refreshToken)
         ) { 
-        throw createError(401, 'Authentication failed');
+        throw createError(401, 'Authentification failed');
     }
 
     const userId = JSON.parse(decodeTokens(refreshToken, '.', 1)).data._id;
     const user = await User.findById(userId);
 
-    if (!user && user.refreshToken !== refreshToken) { throw createError(401, 'Authentication failed'); }
+    if (!user && user.refreshToken !== refreshToken) { throw createError(403, 'Authentication failed'); }
 
     req.user = user;
     return next();
@@ -100,7 +98,9 @@ exports.setTokens = async (req, res, next) => {
     req.user.refreshToken = tokens.refresh;
 
     req.user.save( err => {
-        if (err) { throw createError(500, 'Internal server error');}
+        if (err) { throw createError(500, err);
+        
+    }
     });
     delete req.user;
 

@@ -9,7 +9,8 @@ const express = require('express'),
     port = process.argv[2] || process.env.PORT,
     routerUser = require('./Routes/user'),
     routerObject = require('./Routes/object'),
-    routerAtcionsObject = require('./Routes/object/actionsObject');
+    routerAtcionsObject = require('./Routes/object/actionsObject'),
+    routerAdmin = require('./Routes/admin');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -17,8 +18,9 @@ app.use(cookieParser());
 app.use('/user', routerUser);
 app.use('/', routerObject);
 app.use('/object', routerAtcionsObject);
+app.use('/admin/users', routerAdmin);
 
-app.use((req, res, next) => next(createError(404)));
+app.use((req, res, next) => next( createError(404) ));
 app.use((error, req, res, next) => {
     console.log(error.status, error.message);
     res.status(error.status || 500)

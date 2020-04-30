@@ -10,16 +10,16 @@ exports.validateRequest = async (req, res, next) => {
 
 exports.verifyUser = async (req, res, next) => {
     const user = await User.findById(req.token.data._id);
-    if (!user) { throw createError(404, 'User not found'); }
+    if (!user) { throw createError(403, 'User is not found'); }
 
     req.currUser = user;
     return next();
 };
 
 exports.list = async (req, res) => {
-    Object.find({ user: req.currUser ._id }).
+    Object.find({ user: req.currUser ._id }, 'value type fruit').
     exec( (err, listObjects) => {
-        if (err) { throw createError(404, 'List of objects not found'); }
+        if (err) { throw createError(500, err); }
     
         res.send(JSON.stringify(listObjects));
     });
@@ -28,23 +28,22 @@ exports.list = async (req, res) => {
 
 exports.create = async (req, res) => {
     const {
-        _id,
         value,
         type,
         fruit,
     } = req.body;
 
     const object = new Object({
-        _id,
         value,
         type,
         fruit,
         user: req.currUser ._id
     });
 
-    object.save( err => {
-        if (err) { throw createError(500, 'Internal server error'); }
-        res.sendStatus(200);
+    object.save( (err, object) => {
+        if (err) { throw createError(500, err); }
+
+        res.send(JSON.stringify(object._id));
     });
 };
 
@@ -62,8 +61,9 @@ exports.update = async (req, res) => {
             type,
             fruit,
         }, 
-        (err) => {
-            if (err) { throw createError(404, 'Object not found'); }
+        (err, user) => {
+            if (err) { throw createError(404, err); }
+            if (!user) {return res.sendStatus(404); }
             res.sendStatus(200);
         }
     );
@@ -74,8 +74,9 @@ exports.delete = async (req, res) => {
         _id: req.body.id,
         user: req.currUser._id
     }, 
-    err => {
-        if (err) { throw createError(404, 'Object not found'); }
+    (err, user) => {
+        if (err) { throw createError(500, err); }
+        if(!user) { return res.sendStatus(404); }
         res.sendStatus(200);
     });
 };

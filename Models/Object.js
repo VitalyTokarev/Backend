@@ -2,7 +2,6 @@ const mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 const ObjectModelSchema = new Schema({
-    _id: String,
     value: { 
         type:String,
         required:true

@@ -19,6 +19,7 @@ const generateAccessToken = user => {
     data: {
       _id: user._id,        
       name: user.name,
+      role: user.role,
     }
   }, process.env.SECRET_KEY, { expiresIn: '30m' });
 };
