@@ -81,10 +81,11 @@ exports.updateUser = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
-    User.findByIdAndDelete( req.body.id, 
-    (err, user) => {
+    User.findOne({ _id: req.body.id }, (err, user) => {
         if (err) { return res.sendStatus(500); }
-        if(!user) { return res.sendStatus(404); }
-        res.sendStatus(200);
+        if (!user) {return res.sendStatus(404); }
+        
+        user.remove();
+        return res.sendStatus(200);
     });
 };

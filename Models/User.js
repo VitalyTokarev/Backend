@@ -30,11 +30,8 @@ const UserModelSchema = new Schema({
   }
 });
 
-UserModelSchema.pre('findOneAndDelete', async function(next) {
-  const user = await this.model.findOne({_id: this.getQuery()._id});
-  if ( !user ) { return next('User is not found!'); }
-
-  const objects = await Object.find({user: this.getQuery()._id});
+UserModelSchema.pre('remove', async function(next) {
+  const objects = await Object.find({user: this._id});
 
   if ( objects.length === 0 ) { return next(); }
 
