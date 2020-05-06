@@ -98,9 +98,7 @@ exports.setTokens = async (req, res, next) => {
     req.user.refreshToken = tokens.refresh;
 
     req.user.save( err => {
-        if (err) { throw createError(500, err);
-        
-    }
+        if (err) { return res.sendStatus(500); }
     });
     delete req.user;
 

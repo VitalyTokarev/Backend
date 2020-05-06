@@ -1,5 +1,6 @@
 const mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
+  Schema = mongoose.Schema,
+  Object = require('./Object');
 
 const UserModelSchema = new Schema({
   name: {
@@ -7,10 +8,10 @@ const UserModelSchema = new Schema({
   },
   
   email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
   },
 
   role: {
@@ -28,4 +29,11 @@ const UserModelSchema = new Schema({
   }
 });
 
+UserModelSchema.pre('findOneAndDelete', function(next) {
+  Object.deleteMany({ user: this.getQuery()._id}, err => {
+    if(err) { return next(err); }
+  });
+
+  return next();
+});
 module.exports = mongoose.model('User', UserModelSchema);

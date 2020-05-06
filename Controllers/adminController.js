@@ -1,7 +1,6 @@
 const argon2 = require('argon2'),
     createError = require('http-errors'),
-    User = require('../Models/User'),
-    Object = require('../Models/Object');
+    User = require('../Models/User');
 
 exports.validateRequest = async (req, res, next) => {
     if (!req.body) { throw createError(400, 'Bad request'); }
@@ -23,7 +22,7 @@ exports.checkRole =  requiredRole => {
 exports.getUsers = async (req, res) => {
     User.find({}, 'name email role').
     exec( (err, listUsers) => {
-        if (err) { throw createError(500, err); }
+        if (err) { return res.sendStatus(500); }
         
         res.send(JSON.stringify(listUsers));
     });
@@ -47,7 +46,7 @@ exports.createUser = async (req, res) => {
     });
 
     user.save( (err, user) => {
-        if (err) { throw createError(500, err); }
+        if (err) { return res.sendStatus(500); }
 
         res.send(JSON.stringify(user._id));
     });
@@ -73,7 +72,7 @@ exports.updateUser = async (req, res) => {
 
     User.findByIdAndUpdate( _id, { ...updateFileds }, 
         (err, user) => {
-            if (err) { throw createError(500, err); }
+            if (err) { return res.sendStatus(500); }
             if( !user ) { return res.sendStatus(404); }
 
             res.sendStatus(200);
@@ -84,16 +83,8 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res, next) => {
     User.findByIdAndDelete( req.body.id, 
     (err, user) => {
-        if (err) { throw createError(500, err); }
+        if (err) { return res.sendStatus(500); }
         if(!user) { return res.sendStatus(404); }
-    });
-
-    return next();
-};
-
-exports.deleteUserObjects = async (req, res) => {
-    Object.deleteMany({ user: req.body.id}, err => {
-        if(err) {throw createError(500, err)}
         res.sendStatus(200);
-    })
-}
+    });
+};

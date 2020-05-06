@@ -32,7 +32,6 @@ router.delete(
     authToken,
     asyncHandler(adminController.checkRole('admin')), 
     asyncHandler(adminController.deleteUser), 
-    asyncHandler(adminController.deleteUserObjects)
 );
 
 module.exports = router;

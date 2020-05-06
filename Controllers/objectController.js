@@ -19,7 +19,7 @@ exports.verifyUser = async (req, res, next) => {
 exports.list = async (req, res) => {
     Object.find({ user: req.currUser ._id }, 'value type fruit').
     exec( (err, listObjects) => {
-        if (err) { throw createError(500, err); }
+        if (err) { return res.sendStatus(500); }
     
         res.send(JSON.stringify(listObjects));
     });
@@ -41,7 +41,7 @@ exports.create = async (req, res) => {
     });
 
     object.save( (err, object) => {
-        if (err) { throw createError(500, err); }
+        if (err) { return res.sendStatus(500); }
 
         res.send(JSON.stringify(object._id));
     });
@@ -62,7 +62,7 @@ exports.update = async (req, res) => {
             fruit,
         }, 
         (err, user) => {
-            if (err) { throw createError(404, err); }
+            if (err) { return res.sendStatus(500); }
             if (!user) {return res.sendStatus(404); }
             res.sendStatus(200);
         }
@@ -75,7 +75,7 @@ exports.delete = async (req, res) => {
         user: req.currUser._id
     }, 
     (err, user) => {
-        if (err) { throw createError(500, err); }
+        if (err) { return res.sendStatus(500); }
         if(!user) { return res.sendStatus(404); }
         res.sendStatus(200);
     });
