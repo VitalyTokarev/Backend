@@ -70,8 +70,8 @@ exports.updateUser = async (req, res) => {
         const passwordHashed = await argon2.hash( password );
         updateFileds.password = passwordHashed;
     }
-    const id = '5eaab5b85ec788386484b4eb';
-    User.findByIdAndUpdate( id, { ...updateFileds }, 
+
+    User.findByIdAndUpdate( _id, { ...updateFileds }, 
         (err, user) => {
             if (err) { throw createError(500, err); }
             if( !user ) { return res.sendStatus(404); }
