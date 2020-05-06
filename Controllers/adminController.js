@@ -80,7 +80,7 @@ exports.updateUser = async (req, res) => {
     );
 };
 
-exports.deleteUser = async (req, res, next) => {
+exports.deleteUser = async (req, res) => {
     User.findByIdAndDelete( req.body.id, 
     (err, user) => {
         if (err) { return res.sendStatus(500); }
