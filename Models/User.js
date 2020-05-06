@@ -29,11 +29,15 @@ const UserModelSchema = new Schema({
   }
 });
 
-UserModelSchema.pre('findOneAndDelete', function(next) {
-  Object.deleteMany({ user: this.getQuery()._id}, err => {
-    if(err) { return next(err); }
-  });
+UserModelSchema.pre('findOneAndDelete', async function(next) {
+  const objects = await Object.find({user: this.getQuery()._id});
+  if ( objects.length === 0 ) { return next(); }
 
+  for(object of objects) {
+    object.remove();
+  }
+  
   return next();
 });
+
 module.exports = mongoose.model('User', UserModelSchema);
