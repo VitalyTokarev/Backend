@@ -1,37 +1,44 @@
-const adminController = require('./../../Controllers/adminController'),
+const userController = require('../../Controllers/userController'),
     asyncHandler = require('express-async-handler'),
     router = require('express').Router(),
-    { authToken } = require('../../Services/actionsTokens');
+    authToken = require('../../Middlewares/authToken'),
+    checkRole = require('../../Middlewares/checkRole'),
+    verifyUser = require('../../Middlewares/verifyUser'),
+    { validateRequestBody } = require('../../Middlewares/validateRequest');
 
 router.get(
     '/show', 
     authToken,
-    asyncHandler(adminController.checkRole('admin')),
-    asyncHandler(adminController.getUsers), 
+    asyncHandler(verifyUser),
+    asyncHandler(checkRole('admin')),
+    asyncHandler(userController.getAll), 
 );
 
 router.post(
     '/create', 
-    asyncHandler(adminController.validateRequest), 
+    asyncHandler(validateRequestBody), 
     authToken,
-    asyncHandler(adminController.checkRole('admin')), 
-    asyncHandler(adminController.createUser), 
+    asyncHandler(verifyUser),
+    asyncHandler(checkRole('admin')), 
+    asyncHandler(userController.create), 
 );
 
 router.put(
     '/update', 
-    asyncHandler(adminController.validateRequest), 
+    asyncHandler(validateRequestBody), 
     authToken,
-    asyncHandler(adminController.checkRole('admin')), 
-    asyncHandler(adminController.updateUser), 
+    asyncHandler(verifyUser),
+    asyncHandler(checkRole('admin')), 
+    asyncHandler(userController.update), 
 );
 
 router.delete(
     '/delete', 
-    asyncHandler(adminController.validateRequest), 
+    asyncHandler(validateRequestBody), 
     authToken,
-    asyncHandler(adminController.checkRole('admin')), 
-    asyncHandler(adminController.deleteUser), 
+    asyncHandler(verifyUser),
+    asyncHandler(checkRole('admin')), 
+    asyncHandler(userController.delete), 
 );
 
 module.exports = router;

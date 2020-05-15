@@ -1,7 +1,6 @@
 require('dotenv').config();
 
-const jwt = require('jsonwebtoken'),
-  jwtExpress = require('express-jwt');
+const jwt = require('jsonwebtoken');
 
 createRandomString = () => {
   let text = '';
@@ -46,18 +45,12 @@ exports.validateTokens = (acces, refresh) => {
 };
 
 exports.generateTokens = user => {
-    const access = generateAccessToken(user);
-    const refresh = generateRefreshToken(access);
+  const access = generateAccessToken(user);
+  const refresh = generateRefreshToken(access);
 
-    return { access, refresh }
+  return { access, refresh }
 };
 
-const getAccessToken = req => {
-  return req.cookies.accessToken;
+exports.decodeTokens = (token, splitParam = '.', index = 0) => {
+  return Buffer.from(token.split(splitParam)[index], 'base64').toString();
 };
-
-exports.authToken = jwtExpress({
-    secret: process.env.SECRET_KEY,
-    userProperty: 'token', 
-    getToken: getAccessToken,
-});

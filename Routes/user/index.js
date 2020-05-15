@@ -1,30 +1,34 @@
-const userController = require('./../../Controllers/userController'),
+const authController = require('../../Controllers/authController'),
     asyncHandler = require('express-async-handler'),
-    router = require('express').Router();
+    router = require('express').Router(),
+    { 
+        validateRequestBody,
+        validateRequestAuthorizationHeaders,
+    } = require('../../Middlewares/validateRequest'); 
 
 router.post(
     '/login', 
-    asyncHandler(userController.validateLoginRequest),
-    asyncHandler(userController.verifyLoginRequest), 
-    asyncHandler(userController.setTokens), 
-    asyncHandler(userController.sendRepsonse)
+    asyncHandler(validateRequestAuthorizationHeaders),
+    asyncHandler(authController.verifyLoginRequest), 
+    asyncHandler(authController.setTokens), 
+    asyncHandler(authController.sendRepsonse)
 );
 
 router.post(
     '/signup', 
-    asyncHandler(userController.validateSignupRequest), 
-    asyncHandler(userController.verifySignupRequest), 
-    asyncHandler(userController.createNewUser), 
-    asyncHandler(userController.setTokens), 
-    asyncHandler(userController.sendRepsonse)
+    asyncHandler(validateRequestBody), 
+    asyncHandler(authController.verifySignupRequest), 
+    asyncHandler(authController.createNewUser), 
+    asyncHandler(authController.setTokens), 
+    asyncHandler(authController.sendRepsonse)
 );
 
 router.post(
     '/update_token', 
-    asyncHandler(userController.validateRefreshTokensRequest),
-    asyncHandler(userController.verifyRefrshTokensRequest),
-    asyncHandler(userController.setTokens), 
-    asyncHandler(userController.sendRepsonse)
+    asyncHandler(validateRequestAuthorizationHeaders),
+    asyncHandler(authController.verifyRefrshTokensRequest),
+    asyncHandler(authController.setTokens), 
+    asyncHandler(authController.sendRepsonse)
 );
 
 module.exports = router;

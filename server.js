@@ -15,10 +15,10 @@ const express = require('express'),
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.use('/user', routerUser);
+app.use('/', routerUser);
 app.use('/', routerObject);
 app.use('/object', routerAtcionsObject);
-app.use('/admin/users', routerAdmin);
+app.use('/users', routerAdmin);
 
 app.use((req, res, next) => next( createError(404) ));
 app.use((error, req, res, next) => {

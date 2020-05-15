@@ -1,12 +1,13 @@
 const objectController = require('../../Controllers/objectController'),
     router = require('express').Router(),
     asyncHandler = require('express-async-handler'),
-    { authToken } = require('../../Services/actionsTokens');
+    authToken = require('../../Middlewares/authToken'),
+    verifyUser = require('../../Middlewares/verifyUser');
 
 router.get(
     '/object', 
     authToken, 
-    asyncHandler(objectController.verifyUser),
+    asyncHandler(verifyUser),
     asyncHandler(objectController.list),
 );
 

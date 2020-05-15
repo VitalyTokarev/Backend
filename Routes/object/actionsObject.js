@@ -1,29 +1,31 @@
 const objectController = require('../../Controllers/objectController'),
     router = require('express').Router(),
     asyncHandler = require('express-async-handler'),
-    { authToken } = require('../../Services/actionsTokens');
+    authToken = require('../../Middlewares/authToken'),
+    verifyUser = require('../../Middlewares/verifyUser'),
+    { validateRequestBody } = require('../../Middlewares/validateRequest');
 
 router.post(
     '/create', 
-    asyncHandler(objectController.validateRequest),
+    asyncHandler(validateRequestBody), 
     authToken, 
-    asyncHandler(objectController.verifyUser),
+    asyncHandler(verifyUser),
     asyncHandler(objectController.create),
 );
 
 router.put(
     '/update', 
-    asyncHandler(objectController.validateRequest),
+    asyncHandler(validateRequestBody), 
     authToken, 
-    asyncHandler(objectController.verifyUser),
+    asyncHandler(verifyUser),
     asyncHandler(objectController.update),
 );
     
 router.delete(
     '/delete',
-    asyncHandler(objectController.validateRequest),
+    asyncHandler(validateRequestBody), 
     authToken, 
-    asyncHandler(objectController.verifyUser),
+    asyncHandler(verifyUser),
     asyncHandler(objectController.delete),
 );
 

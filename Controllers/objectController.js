@@ -1,20 +1,4 @@
-const createError = require('http-errors'),
-    Object = require('../Models/Object'),
-    User = require('../Models/User');
-
-exports.validateRequest = async (req, res, next) => {
-    if (!req.body) { throw createError(400, 'Bad request'); }
-
-    return next();
-};
-
-exports.verifyUser = async (req, res, next) => {
-    const user = await User.findById(req.token.data._id);
-    if (!user) { throw createError(403, 'User is not found'); }
-
-    req.currUser = user;
-    return next();
-};
+const Object = require('../Models/Object');
 
 exports.list = async (req, res) => {
     Object.find({ user: req.currUser ._id }, 'value type fruit').
